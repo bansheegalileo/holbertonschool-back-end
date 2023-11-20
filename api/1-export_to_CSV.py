@@ -3,25 +3,25 @@
 export to csv
 """
 
-from sys import argv
+import csv
 from requests import get
+from sys import argv
 
 url_base = 'https://jsonplaceholder.typicode.com/users/'
 
 
 def export_csv():
-    """"""
-    usr = get(url_base + argv[1]).json()
-    tasks = get(url_base + argv[1] + '/todos').json()
+    user_data = get(url_base + argv[1]).json()
+    tasks_data = get(url_base + argv[1] + '/todos').json()
     file_name = argv[1] + '.csv'
 
-    for task in tasks:
-        data = '"' + str(usr['id']) + '",' + '"' + usr['username'] + '",' +\
-               '"' + str(task['completed']) + '",' + '"' + task['title'] +\
-               '"\n'
+    with open(file_name, 'w', encoding='utf-8', newline='') as csvfile:
+        csv_writer = csv.writer(csvfile, quotechar='"',
+                                quoting=csv.QUOTE_MINIMAL)
 
-        with open(file_name, 'a', encoding='utf-8') as csvfile:
-            csvfile.write(data)
+        for task in tasks_data:
+            csv_writer.writerow([user_data['id'], user_data['username'],
+                                 task['completed'], task['title']])
 
 
 if __name__ == '__main__':

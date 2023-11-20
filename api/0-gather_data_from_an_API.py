@@ -1,30 +1,34 @@
 #!/usr/bin/python3
-"""
-simulation of worker drone surveilance
-"""
+"""worker drone surveilence sim"""
 
 import requests
 import sys
 
+
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: {} <employee_id>".format(sys.argv[0]))
+        print(f"UsageError: python3 {__file__} employee_id(int)")
         sys.exit(1)
 
-    employee_id = sys.argv[1]
-    base_url = "https://jsonplaceholder.typicode.com"
+    API_URL = "https://jsonplaceholder.typicode.com"
+    EMPLOYEE_ID = sys.argv[1]
 
-    user_response = requests.get("{}/users/{}".format(base_url, employee_id))
-    user_data = user_response.json()
+    response = requests.get(
+        f"{API_URL}/users/{EMPLOYEE_ID}/todos",
+        params={"_expand": "user"}
+    )
+    data = response.json()
 
-    todo_response = requests.get("{}/todos?userId={}".format(base_url, employee_id))
-    todo_data = todo_response.json()
+    if not len(data):
+        print("RequestError:", 404)
+        sys.exit(1)
 
-    completed_tasks = [task for task in todo_data if task["completed"]]
+    employee_name = data[0]["user"]["name"]
+    total_tasks = len(data)
+    done_tasks = [task for task in data if task["completed"]]
+    total_done_tasks = len(done_tasks)
 
-    print("Employee {} is done with tasks({}/{}):".format(
-        user_data["name"], len(completed_tasks), len(todo_data)
-    ))
-
-    for task in completed_tasks:
-        print("\t {}".format(task["title"]))
+    print(f"Employee {employee_name} is done with tasks"
+          f"({total_done_tasks}/{total_tasks}):")
+    for task in done_tasks:
+        print(f"\t {task['title']}")

@@ -1,28 +1,59 @@
 #!/usr/bin/python3
 """
-export to csv
+Worker drone surveillance sim
 """
 
 import csv
-from requests import get
+import requests
 from sys import argv
 
-url_base = 'https://jsonplaceholder.typicode.com/users/'
+URL_BASE = 'https://jsonplaceholder.typicode.com/users/'
 
 
-def export_csv():
-    user_data = get(url_base + argv[1]).json()
-    tasks_data = get(url_base + argv[1] + '/todos').json()
-    file_name = argv[1] + '.csv'
+def get_data():
+    """This function gets data from the JSONPlaceholder API and exports it to CSV."""
+    user_id = argv[1]
 
-    with open(file_name, 'w', encoding='utf-8', newline='') as csvfile:
-        csv_writer = csv.writer(csvfile, quotechar='"',
-                                quoting=csv.QUOTE_MINIMAL)
+    # Fetch user data
+    user_data = requests.get(URL_BASE + user_id).json()
+    username = user_data['username']
 
-        for task in tasks_data:
-            csv_writer.writerow([user_data['id'], user_data['username'],
-task['completed'], task['title']])
+    # Fetch user's todos
+    todos = requests.get(URL_BASE + user_id + '/todos/').json()
+
+    # Write data to CSV file
+    csv_file_name = '{}.csv'.format(user_id)
+    with open(csv_file_name, 'w', newline='') as csvfile:
+        csv_writer = csv.writer(csvfile)
+        csv_writer.writerow([
+            "USER_ID",
+            "USERNAME",
+            "TASK_COMPLETED_STATUS",
+            "TASK_TITLE"
+        ])
+
+        for item in todos:
+            task_completed_status = "True" if item['completed'] else "False"
+            task_title = item['title']
+
+            # Write a row to the CSV file
+            csv_writer.writerow([
+                user_id,
+                username,
+                task_completed_status,
+                task_title
+            ])
+
+    # Print a summary
+    print(
+        'Employee {} is done with tasks({}/{}):\n{}'.format(
+            user_data['name'],
+            sum(1 for item in todos if item['completed']),
+            len(todos),
+            csv_file_name
+        )
+    )
 
 
 if __name__ == '__main__':
-    export_csv()
+    get_data()

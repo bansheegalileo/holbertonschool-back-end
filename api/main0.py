@@ -13,7 +13,6 @@ todos_url = "https://jsonplaceholder.typicode.com/todos"
 
 def user_info(id):
     """ Check user information """
-
     total_tasks = 0
     response = requests.get(todos_url).json()
     for i in response:
@@ -31,6 +30,10 @@ def user_info(id):
     else:
         print("Number of tasks in CSV: Incorrect")
 
+    # Return total_tasks value
+    return total_tasks
 
 if __name__ == "__main__":
-    user_info(int(sys.argv[1]))
+    user_id = int(sys.argv[1])
+    total_tasks = user_info(user_id)
+    print(f"Total tasks: {total_tasks}")

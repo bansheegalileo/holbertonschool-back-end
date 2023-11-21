@@ -1,59 +1,49 @@
 #!/usr/bin/python3
 """
-Worker drone surveillance sim
+csv export
 """
 
 import csv
 import requests
-from sys import argv
-
-URL_BASE = 'https://jsonplaceholder.typicode.com/users/'
+import sys
 
 
-def get_data():
-    """This function gets data from the JSONPlaceholder API and exports it to CSV."""
-    user_id = argv[1]
+def export_to_csv():
+    """
+    data grabber
+    """
+    if(len(sys.argv) != 2):
+        print("Error not 3 commands")
 
-    # Fetch user data
-    user_data = requests.get(URL_BASE + user_id).json()
-    username = user_data['username']
+    USER_ID = sys.argv[1]
 
-    # Fetch user's todos
-    todos = requests.get(URL_BASE + user_id + '/todos/').json()
+    user_data = requests.get('https://jsonplaceholder.typicode.com/users/{}'
+                             .format(USER_ID)).json()
+    todo_data = requests.get('https://jsonplaceholder.typicode.com/todos',
+                             params={"userId": USER_ID}).json()
+    EMPLOYEE_UN = user_data.get("username")
+    EMPLOYEE_NAME = user_data.get("name")
+    NUMBER_OF_DONE_TASKS = 0
+    TOTAL_NUMBER_OF_TASKS = 0
 
-    # Write data to CSV file
-    csv_file_name = '{}.csv'.format(user_id)
-    with open(csv_file_name, 'w', newline='') as csvfile:
-        csv_writer = csv.writer(csvfile)
-        csv_writer.writerow([
-            "USER_ID",
-            "USERNAME",
-            "TASK_COMPLETED_STATUS",
-            "TASK_TITLE"
-        ])
+    completed_tasks = []
 
-        for item in todos:
-            task_completed_status = "True" if item['completed'] else "False"
-            task_title = item['title']
+    with open('{}.csv'.format(USER_ID), 'w') as f:
+        writer = csv.writer(f, quoting=csv.QUOTE_ALL)
+        for item in todo_data:
+            writer.writerow((USER_ID, EMPLOYEE_UN,
+                             item.get("completed"), item.get("title")))
 
-            # Write a row to the CSV file
-            csv_writer.writerow([
-                user_id,
-                username,
-                task_completed_status,
-                task_title
-            ])
+            TOTAL_NUMBER_OF_TASKS += 1
+            if item.get("completed"):
+                NUMBER_OF_DONE_TASKS += 1
+                completed_tasks.append(item.get("title"))
 
-    # Print a summary
-    print(
-        'Employee {} is done with tasks({}/{}):\n{}'.format(
-            user_data['name'],
-            sum(1 for item in todos if item['completed']),
-            len(todos),
-            csv_file_name
-        )
-    )
+    print('Employee {} is done with tasks({}/{}):'
+          .format(EMPLOYEE_NAME, NUMBER_OF_DONE_TASKS, TOTAL_NUMBER_OF_TASKS))
+    for task in completed_tasks:
+        print("\t {}".format(task))
 
 
-if __name__ == '__main__':
-    get_data()
+if __name__ == "__main__":
+    export_to_csv()

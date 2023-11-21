@@ -12,26 +12,40 @@ todos_url = "https://jsonplaceholder.typicode.com/todos"
 
 
 def user_info(id):
-    """ Check CSV formatting """
+    """ Check user information """
 
+    total_tasks = 0
     response = requests.get(todos_url).json()
+    for i in response:
+        if i['userId'] == id:
+            total_tasks += 1
+
+    response = requests.get(users_url + str(id)).json()
+    username = response[0]['username']
+
+    flag = 0
     with open(str(id) + ".csv", 'r') as f:
-        output = f.read().strip()
-        count = 0
-        flag = 0
-        for i in response:
-            if i['userId'] == id:
-                url = users_url + str(i['userId'])
-                usr_resp = requests.get(url).json()
-                line = '"' + str(i['userId']) + '","' + usr_resp[0]['username'] + '","' + str(i['completed']) + '","' + i['title'] + '"'
-                count += 1
-                if not line in output:
-                    print("Task {} Formatting: Incorrect".format(count))
+        for line in f:
+            if not line == '\n':
+                if not str(id) in line:
+                    print("User ID: Incorrect / ", end='')
+                    flag = 1
+                if not str(username) in line:
+                    print("Username: Incorrect")
                     flag = 1
 
     if flag == 0:
-        print("Formatting: OK")
+        print("User ID and Username: OK")
+    else:
+        print("User ID or Username: Incorrect")
 
 
 if __name__ == "__main__":
-    user_info(int(sys.argv[1]))
+    try:
+        user_id = int(sys.argv[1])
+        print("Executing with user ID:", user_id)
+        user_info(user_id)
+    except IndexError:
+        print("Error: Please provide a user ID as a command-line argument.")
+    except Exception as e:
+        print("Error:", e)

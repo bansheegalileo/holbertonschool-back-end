@@ -33,7 +33,7 @@ def export_to_csv():
         for item in todo_data:
             writer.writerow((USER_ID, EMPLOYEE_UN,
                              item.get("completed"), item.get("title")))
-            
+
             TOTAL_NUMBER_OF_TASKS += 1
             if item.get("completed"):
                 NUMBER_OF_DONE_TASKS += 1

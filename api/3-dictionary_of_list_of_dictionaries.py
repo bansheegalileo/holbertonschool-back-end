@@ -21,8 +21,8 @@ def record_all_tasks():
     complete_status_list = [item["completed"] for item in todo_data]
     username_list = [user["username"] for user in user_data]
 
-    todo_list = [requests.get(todo_url, params={"userId": i}).json() 
-                for i in range(1, len(user_data) + 1)]
+    todo_list = [requests.get(todo_url, params={"userId": i}).json()
+                 for i in range(1, len(user_data) + 1)]
 
     json_dict = {}
     total_counter = 0
@@ -33,7 +33,8 @@ def record_all_tasks():
                 "task": task_list[total_counter],
                 "completed": complete_status_list[total_counter],
             }
-            for total_counter in range(total_counter, total_counter + len(tasks))
+            for total_counter in range(total_counter,
+                                       total_counter + len(tasks))
         ]
         json_dict[f'{counter}'] = json_list
         total_counter += len(tasks)

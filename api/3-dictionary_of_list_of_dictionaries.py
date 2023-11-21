@@ -1,8 +1,11 @@
 #!/usr/bin/python3
-""" Dictionary of list of dictionaries """
+"""
+im stressed
+"""
 import json
 import requests
 import sys
+
 
 def record_all_tasks():
     """Gather and print API data"""
